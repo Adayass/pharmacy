@@ -4,10 +4,7 @@ require_once 'connect.php';
 // $db is the PDO connection from connect.php (equivalent of $conn in the original)
 
 // Pull data relational records joining Sales onto Cashier identities
-$query = "SELECT s.saleId, s.saleDate, u.fullName as cashier, s.paymentMethod, s.totalAmount 
-          FROM sales s 
-          JOIN users u ON s.userId = u.userId 
-          ORDER BY s.saleDate DESC";
+$query = "SELECT s.saleId, s.saleDate, u.fullName as cashier, s.paymentMethod, s.totalAmount FROM sales s JOIN users u ON s.userId = u.userId ORDER BY s.saleDate DESC";
 $result = $db->query($query)->fetchAll();
 
 $pageTitle = 'Sales History';

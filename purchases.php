@@ -6,12 +6,12 @@ require_once 'connect.php';
 $purchaseError = null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_purchase'])) {
-    $supplierId    = $_POST['supplierId'] ?? '';
-    $invoiceNumber = trim($_POST['invoiceNumber'] ?? '');
-    $purchaseDate  = $_POST['purchaseDate'] ?? '';
-    $medicineIds   = $_POST['medicineId'] ?? [];
-    $quantities    = $_POST['quantity'] ?? [];
-    $prices        = $_POST['buyingPrice'] ?? [];
+    $supplierId = $_POST['supplierId'] ?? '';
+    $invoiceNumber= trim($_POST['invoiceNumber'] ?? '');
+    $purchaseDate= $_POST['purchaseDate'] ?? '';
+    $medicineIds = $_POST['medicineId'] ?? [];
+    $quantities =$_POST['quantity'] ?? [];
+    $prices =$_POST['buyingPrice'] ?? [];
 
     if ($supplierId === '' || $purchaseDate === '') {
         $purchaseError = "Supplier and Purchase Date are required.";
@@ -23,6 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_purchase'])) {
             $price = $prices[$i] ?? '';
             if ($medId !== '' && $qty !== '' && $price !== '' && (int)$qty > 0) {
                 $lineItems[] = [
+
                     'medicineId' => (int)$medId,
                     'quantity'   => (int)$qty,
                     'price'      => (float)$price,
@@ -46,10 +47,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_purchase'])) {
                 $purchaseId = $db->lastInsertId();
 
                 $detailStmt = $db->prepare("INSERT INTO purchase_details (purchaseId, medicineId, quantity, buyingPrice, subtotal) VALUES (?, ?, ?, ?, ?)");
-                // Stock increases AND the medicine's buying price updates to
-                // this latest cost - a purchase reflects the newest price
-                // paid, which is what "Saving updates stock levels
-                // automatically" in the mockup refers to.
                 $stockStmt = $db->prepare("UPDATE medicines SET quantity = quantity + ?, price = ? WHERE medicineId = ?");
 
                 foreach ($lineItems as $item) {

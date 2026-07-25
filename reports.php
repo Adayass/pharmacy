@@ -2,7 +2,6 @@
 require_once 'includes/auth.php';
 require_role(['admin']);
 require_once 'connect.php';
-// $db is the PDO connection from connect.php (equivalent of $conn in the original)
 
 // 1. Inventory Report Aggregates
 $inv = $db->query("SELECT COUNT(*) as total_meds, SUM(quantity) as total_units, SUM(sellingPrice * quantity) as total_val FROM medicines")->fetch();
@@ -11,8 +10,7 @@ $inv = $db->query("SELECT COUNT(*) as total_meds, SUM(quantity) as total_units, 
 $sales = $db->query("SELECT COUNT(*) as total_sales, SUM(totalAmount) as revenue, AVG(totalAmount) as avg_sale FROM sales")->fetch();
 
 // 3. Purchase Report - NOTE: your schema has no dedicated "purchases" table
-// (only stock_movements, which doesn't record cost). These two numbers are
-// still hardcoded placeholders from the original file - see note below.
+
 $purch_total_spent = 220000;
 $purch_count = 3;
 

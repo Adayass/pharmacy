@@ -47,9 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_medicine'])) {
     }
 }
 
-/* ---------------------------------------------------------
-   Handle Delete request
-   --------------------------------------------------------- */
+/*handle Delete request*/
 if (isset($_GET['delete'])) {
     $deleteId = (int)$_GET['delete'];
     try {
@@ -58,10 +56,7 @@ if (isset($_GET['delete'])) {
         header("Location: medicines.php?deleted=1");
         exit();
     } catch (PDOException $e) {
-        // medicineId is referenced by sale_details, purchase_details, and
-        // stock_movements with no cascade rule - a medicine that has ever
-        // been sold or purchased can't be deleted without breaking that
-        // history, so this stops it instead of crashing.
+
         $deleteError = "This medicine can't be deleted because it has sales, purchase, or stock history linked to it.";
     }
 }

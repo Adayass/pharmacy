@@ -38,9 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_user'])) {
     }
 }
 
-/* ---------------------------------------------------------
-   Handle delete request
-   --------------------------------------------------------- */
+/*manage delete request*/
 if (isset($_GET['delete'])) {
     $deleteId = (int)$_GET['delete'];
 

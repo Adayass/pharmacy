@@ -1,6 +1,6 @@
 <?php
 require_once 'includes/auth.php';
-require_role(['admin']); // Suppliers is admin-only
+require_role(['admin']); 
 require_once 'connect.php';
 
 $addError = null;
@@ -8,9 +8,7 @@ $addSuccess = false;
 $deleteError = null;
 $deleteSuccess = false;
 
-/* ---------------------------------------------------------
-   Handle Add Supplier submission
-   --------------------------------------------------------- */
+/*manage adding supplier submission*/
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_supplier'])) {
     $supplierName =trim($_POST['supplierName'] ?? '');
     $contactName =trim($_POST['contactName'] ?? '');
@@ -31,9 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_supplier'])) {
     }
 }
 
-/* ---------------------------------------------------------
-   Handle delete request
-   --------------------------------------------------------- */
+/*manage delete request*/
 if (isset($_GET['delete'])) {
     $deleteId = (int)$_GET['delete'];
 
@@ -42,23 +38,13 @@ if (isset($_GET['delete'])) {
         $stmt->execute([$deleteId]);
         $deleteSuccess = true;
     } catch (PDOException $e) {
-        // suppliers.supplierId is referenced by medicines.supplierId with
-        // no cascade rule, so a supplier tied to existing medicines can't
-        // be deleted without those medicines being reassigned first.
         $deleteError = "This supplier can't be deleted because medicines are still linked to them.";
     }
 }
 
-/* ---------------------------------------------------------
-   Fetch suppliers with their medicine count
-   --------------------------------------------------------- */
-$suppliers = $db->query("
-    SELECT s.supplierId, s.supplierName, s.contactName, s.phone, s.email, s.address,
-           COUNT(m.medicineId) AS medicineCount
-    FROM suppliers s
-    LEFT JOIN medicines m ON m.supplierId = s.supplierId
-    GROUP BY s.supplierId
-    ORDER BY s.supplierName ASC
+/*Fetch suppliers with their medicine count*/
+$suppliers = $db->query("SELECT s.supplierId, s.supplierName, s.contactName, s.phone, s.email, s.address, COUNT(m.medicineId) AS medicineCount
+FROM suppliers s LEFT JOIN medicines m ON m.supplierId = s.supplierId GROUP BY s.supplierId ORDER BY s.supplierName ASC
 ")->fetchAll();
 
 $totalSuppliers = count($suppliers);
