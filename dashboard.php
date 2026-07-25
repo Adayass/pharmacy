@@ -27,16 +27,9 @@ $recentSales = $db->query("SELECT s.saleId, u.fullName AS cashierName, s.saleDat
 $expiringSoon = $db->query("SELECT medicineName, expiryDate, DATEDIFF(expiryDate, CURDATE()) AS daysLeft FROM medicines WHERE expiryDate >= CURDATE() AND expiryDate <= DATE_ADD(CURDATE(), INTERVAL 30 DAY) ORDER BY expiryDate ASC LIMIT 5")->fetchAll();
 
 // Low stock list
-$lowStockList = $db->query("
-    SELECT m.medicineName, c.categoryName, s.supplierName,
-           m.quantity, m.minStock, m.expiryDate
-    FROM medicines m
-    LEFT JOIN categories c ON c.categoryId = m.categoryId
-    LEFT JOIN suppliers s ON s.supplierId = m.supplierId
-    WHERE m.quantity <= m.minStock OR m.expiryDate < CURDATE()
-    ORDER BY m.quantity ASC
-    LIMIT 6
-")->fetchAll();
+$lowStockList = $db->query("SELECT m.medicineName, c.categoryName, s.supplierName, m.quantity, m.minStock, m.expiryDate FROM medicines m
+LEFT JOIN categories c ON c.categoryId = m.categoryId LEFT JOIN suppliers s ON s.supplierId = m.supplierId WHERE m.quantity <= m.minStock OR m.expiryDate < CURDATE()
+ORDER BY m.quantity ASC LIMIT 6")->fetchAll();
 
 function stockStatus($row)
 {

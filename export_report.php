@@ -1,6 +1,7 @@
 <?php
 require_once 'includes/auth.php';
 require_once 'connect.php';
+require_role(['admin']);
 
 $type = $_GET['type'] ?? '';
 $allowed = ['inventory', 'sales', 'purchases', 'expiry'];
@@ -9,16 +10,10 @@ if (!in_array($type, $allowed)) {
     die("Invalid report type.");
 }
 
-/* ---------------------------------------------------------
-   These headers are what actually trigger the browser's
-   "Save As" / download behavior instead of rendering a page.
-   Nothing - not even a blank line - can be output before this.
-   --------------------------------------------------------- */
 $filename = "report_{$type}_" . date('Y-m-d') . ".csv";
 header('Content-Type: text/csv; charset=utf-8');
 header('Content-Disposition: attachment; filename="' . $filename . '"');
 
-// Open a write stream to the response body itself
 $out = fopen('php://output', 'w');
 
 switch ($type) {

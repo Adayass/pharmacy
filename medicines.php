@@ -2,6 +2,70 @@
 require_once 'includes/auth.php';
 require_once 'connect.php';
 
+$editError = null;
+$deleteError = null;
+
+/* ---------------------------------------------------------
+   Handle Edit submission
+   --------------------------------------------------------- */
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_medicine'])) {
+    $editId          = (int)($_POST['medicineId'] ?? 0);
+    $medicineName    = trim($_POST['medicineName'] ?? '');
+    $categoryId      = $_POST['categoryId'] ?? '';
+    $supplierId      = $_POST['supplierId'] ?? '';
+    $price           = $_POST['price'] ?? '';
+    $sellingPrice    = $_POST['sellingPrice'] ?? '';
+    $quantity        = $_POST['quantity'] ?? '';
+    $minStock        = $_POST['minStock'] ?? '';
+    $manufactureDate = $_POST['manufactureDate'] ?? '';
+    $expiryDate      = $_POST['expiryDate'] ?? '';
+
+    if ($medicineName === '' || $categoryId === '' || $supplierId === '' || $quantity === '' || $price === '' || $sellingPrice === '' || $expiryDate === '') {
+        $editError = "Please fill in all required fields.";
+    } elseif ($manufactureDate !== '' && $expiryDate <= $manufactureDate) {
+        $editError = "Expiry date must be after the manufacture date.";
+    } else {
+        try {
+            $stmt = $db->prepare("
+                UPDATE medicines SET
+                    medicineName = ?, categoryId = ?, supplierId = ?,
+                    price = ?, sellingPrice = ?, quantity = ?, minStock = ?,
+                    manufactureDate = ?, expiryDate = ?
+                WHERE medicineId = ?
+            ");
+            $stmt->execute([
+                $medicineName, $categoryId, $supplierId,
+                $price, $sellingPrice, $quantity, $minStock !== '' ? $minStock : 0,
+                $manufactureDate !== '' ? $manufactureDate : null, $expiryDate,
+                $editId,
+            ]);
+            header("Location: medicines.php?updated=1");
+            exit();
+        } catch (PDOException $e) {
+            $editError = "Could not save changes. Please check the values and try again.";
+        }
+    }
+}
+
+/* ---------------------------------------------------------
+   Handle Delete request
+   --------------------------------------------------------- */
+if (isset($_GET['delete'])) {
+    $deleteId = (int)$_GET['delete'];
+    try {
+        $stmt = $db->prepare("DELETE FROM medicines WHERE medicineId = ?");
+        $stmt->execute([$deleteId]);
+        header("Location: medicines.php?deleted=1");
+        exit();
+    } catch (PDOException $e) {
+        // medicineId is referenced by sale_details, purchase_details, and
+        // stock_movements with no cascade rule - a medicine that has ever
+        // been sold or purchased can't be deleted without breaking that
+        // history, so this stops it instead of crashing.
+        $deleteError = "This medicine can't be deleted because it has sales, purchase, or stock history linked to it.";
+    }
+}
+
 $search      = trim($_GET['q'] ?? '');
 $categoryId  = $_GET['category'] ?? '';
 $stockStatus = $_GET['stock_status'] ?? '';   // '', 'low', 'expired', 'ok'
@@ -39,23 +103,16 @@ if ($expiryRange === '30') {
 
 $whereSql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
 
-$sql = "SELECT m.medicineId, m.medicineName, c.categoryName, s.supplierName, m.quantity, m.minStock, m.price, m.sellingPrice, m.expiryDate
-FROM medicines m LEFT JOIN categories c ON c.categoryId = m.categoryId
-LEFT JOIN suppliers s  ON s.supplierId  = m.supplierId
-    $whereSql
-    ORDER BY m.medicineId ASC
-";
+$sql = "SELECT m.medicineId, m.medicineName, m.categoryId, m.supplierId, c.categoryName, s.supplierName, m.quantity, m.minStock, m.price, m.sellingPrice, m.manufactureDate, m.expiryDate
+FROM medicines m LEFT JOIN categories c ON c.categoryId = m.categoryId LEFT JOIN suppliers s  ON s.supplierId  = m.supplierId
+$whereSql ORDER BY m.medicineId ASC";
 
 $stmt = $db->prepare($sql);
 $stmt->execute($params);
 $medicines = $stmt->fetchAll();
 
-// For the Category filter dropdown
 $categories = $db->query("SELECT categoryId, categoryName FROM categories ORDER BY categoryName")->fetchAll();
-
-// function medicineCode($id) {
-//     return 'MED-' . strtoupper(base_convert($id, 10, 36));
-// }
+$suppliers  = $db->query("SELECT supplierId, supplierName FROM suppliers ORDER BY supplierName")->fetchAll();
 
 function medicineStatus($row) {
     $expired = strtotime($row['expiryDate']) < strtotime('today');
@@ -64,7 +121,6 @@ function medicineStatus($row) {
     if ($expired) {
         return ['label' => 'Expired', 'class' => 'badge-expired'];
     }
-    // Expiring within 30 days
     $daysLeft = (strtotime($row['expiryDate']) - strtotime('today')) / 86400;
     if ($daysLeft <= 30) {
         return ['label' => 'Expiring Soon', 'class' => 'badge-warn'];
@@ -86,6 +142,7 @@ $pageTitle = 'Medicines';
     <link rel="stylesheet" href="includes/style.css">
     <link rel="stylesheet" href="includes/style_dashboard.css">
     <link rel="stylesheet" href="includes/style_medicines.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
@@ -97,9 +154,19 @@ $pageTitle = 'Medicines';
 
         <div class="container">
 
+            <?php if (isset($_GET['updated'])): ?>
+                <div class="pos-alert pos-alert-success">Medicine updated successfully.</div>
+            <?php endif; ?>
+            <?php if (isset($_GET['deleted'])): ?>
+                <div class="pos-alert pos-alert-success">Medicine deleted successfully.</div>
+            <?php endif; ?>
+            <?php if ($deleteError): ?>
+                <div class="pos-alert pos-alert-error"><?= htmlspecialchars($deleteError) ?></div>
+            <?php endif; ?>
+
             <!-- Search bar -->
             <form method="GET" class="med-search-bar">
-                <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 0 640 640">!Font Awesome Free v7.3.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.<path d="M544 513L397.2 364.2C417.2 336.3 429.1 302 429.1 265C429.1 171.9 354.4 96.1 262.6 96.1C170.7 96 96 171.8 96 264.9C96 358 170.7 433.8 262.5 433.8C302.3 433.8 338.8 419.6 367.5 395.9L513.5 544L544 513zM262.5 394.8C191.9 394.8 134.4 336.5 134.4 264.9C134.4 193.3 191.9 135 262.5 135C333.1 135 390.6 193.3 390.6 264.9C390.6 336.5 333.2 394.8 262.5 394.8z"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 0 640 640"><path d="M544 513L397.2 364.2C417.2 336.3 429.1 302 429.1 265C429.1 171.9 354.4 96.1 262.6 96.1C170.7 96 96 171.8 96 264.9C96 358 170.7 433.8 262.5 433.8C302.3 433.8 338.8 419.6 367.5 395.9L513.5 544L544 513zM262.5 394.8C191.9 394.8 134.4 336.5 134.4 264.9C134.4 193.3 191.9 135 262.5 135C333.1 135 390.6 193.3 390.6 264.9C390.6 336.5 333.2 394.8 262.5 394.8z"/></svg>
                 <input type="text" name="q" value="<?= htmlspecialchars($search) ?>" placeholder="Search Medicines by Name, ID">
                 <button type="submit" class="med-search-btn">Search</button>
             </form>
@@ -157,7 +224,7 @@ $pageTitle = 'Medicines';
                             <th>Selling Price</th>
                             <th>Expiry Date</th>
                             <th>Status</th>
-                            <!-- <th>Actions</th> -->
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -165,7 +232,7 @@ $pageTitle = 'Medicines';
                             <tr><td colspan="10" class="empty-row">No medicines match your filters.</td></tr>
                         <?php else: foreach ($medicines as $m): $status = medicineStatus($m); ?>
                             <tr>
-                                <td><?= ($m['medicineId']) ?></td>
+                                <td><?= $m['medicineId'] ?></td>
                                 <td><?= htmlspecialchars($m['medicineName']) ?></td>
                                 <td><?= htmlspecialchars($m['categoryName'] ?? 'N/A') ?></td>
                                 <td><?= htmlspecialchars($m['supplierName'] ?? 'N/A') ?></td>
@@ -174,11 +241,11 @@ $pageTitle = 'Medicines';
                                 <td>UGX <?= number_format($m['sellingPrice']) ?></td>
                                 <td><?= date('d M Y', strtotime($m['expiryDate'])) ?></td>
                                 <td><span class="badge <?= $status['class'] ?>"><?= $status['label'] ?></span></td>
-                                <!-- <td class="med-actions">
-                                    <a href="view_medicine.php?id=<?= $m['medicineId'] ?>" title="View">&#128065;</a>
-                                    <a href="edit_medicine.php?id=<?= $m['medicineId'] ?>" title="Edit">&#9998;</a>
-                                    <a href="delete_medicine.php?id=<?= $m['medicineId'] ?>" title="Delete" class="med-delete" onclick="return confirm('Delete this medicine?');">&#128465;</a>
-                                </td> -->
+                                <td class="med-actions">
+                                    <a href="#" title="Edit" onclick="openEditModal(<?= $m['medicineId'] ?>); return false;"><i class="fa-solid fa-pen"></i></a>
+                                    <a href="medicines.php?delete=<?= $m['medicineId'] ?>"title="Delete" class="med-delete"
+                                    onclick="return confirm('Delete <?= htmlspecialchars(addslashes($m['medicineName'])) ?>? This cannot be undone.');"><i class="fa-solid fa-trash" style="color: rgb(251, 0, 0);"></i></a>
+                                </td>
                             </tr>
                         <?php endforeach; endif; ?>
                     </tbody>
@@ -188,6 +255,116 @@ $pageTitle = 'Medicines';
         </div>
     </main>
 </div>
+
+<!--edit medicine fonction-->
+<div class="modal-overlay" id="editMedicineOverlay" style="<?= $editError ? 'display:flex;' : '' ?>">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3 id="editModalTitle">Edit Medicine</h3>
+            <button type="button" class="modal-close" onclick="closeEditModal()">x</button>
+        </div>
+
+        <?php if ($editError): ?>
+            <div class="pos-alert pos-alert-error" style="margin: 16px 24px 0;"><?= htmlspecialchars($editError) ?></div>
+        <?php endif; ?>
+
+        <form method="POST" class="modal-form" id="editMedicineForm">
+            <input type="hidden" name="edit_medicine" value="1">
+            <input type="hidden" name="medicineId" id="edit_medicineId">
+
+            <div class="form-group">
+                <label>Medicine Name</label>
+                <input type="text" name="medicineName" id="edit_medicineName" required>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Category</label>
+                    <select name="categoryId" id="edit_categoryId" required>
+                        <?php foreach ($categories as $cat): ?>
+                            <option value="<?= $cat['categoryId'] ?>"><?= htmlspecialchars($cat['categoryName']) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Supplier</label>
+                    <select name="supplierId" id="edit_supplierId" required>
+                        <?php foreach ($suppliers as $sup): ?>
+                            <option value="<?= $sup['supplierId'] ?>"><?= htmlspecialchars($sup['supplierName']) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Buying Price (UGX)</label>
+                    <input type="number" name="price" id="edit_price" min="0" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label>Selling Price (UGX)</label>
+                    <input type="number" name="sellingPrice" id="edit_sellingPrice" min="0" step="0.01" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Quantity / Stock</label>
+                    <input type="number" name="quantity" id="edit_quantity" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label>Minimum Stock (reorder level)</label>
+                    <input type="number" name="minStock" id="edit_minStock" min="0">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Manufacture Date</label>
+                    <input type="date" name="manufactureDate" id="edit_manufactureDate">
+                </div>
+                <div class="form-group">
+                    <label>Expiry Date</label>
+                    <input type="date" name="expiryDate" id="edit_expiryDate" required>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="modal-cancel-btn" onclick="closeEditModal()">Cancel</button>
+                <button type="submit" class="modal-save-btn">Save Medicine</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // All medicine data needed for editing, embedded here so the modal
+    // opens instantly without an extra AJAX request per click.
+    const medicinesData = <?= json_encode($medicines) ?>;
+
+    function openEditModal(id) {
+        const med = medicinesData.find(m => m.medicineId == id);
+        if (!med) return;
+
+        document.getElementById('editModalTitle').textContent = 'Edit ' + med.medicineName;
+        document.getElementById('edit_medicineId').value = med.medicineId;
+        document.getElementById('edit_medicineName').value = med.medicineName;
+        document.getElementById('edit_categoryId').value = med.categoryId;
+        document.getElementById('edit_supplierId').value = med.supplierId;
+        document.getElementById('edit_price').value = med.price;
+        document.getElementById('edit_sellingPrice').value = med.sellingPrice;
+        document.getElementById('edit_quantity').value = med.quantity;
+        document.getElementById('edit_minStock').value = med.minStock;
+        document.getElementById('edit_manufactureDate').value = med.manufactureDate || '';
+        document.getElementById('edit_expiryDate').value = med.expiryDate;
+
+        document.getElementById('editMedicineOverlay').style.display = 'flex';
+    }
+
+    function closeEditModal() {
+        document.getElementById('editMedicineOverlay').style.display = 'none';
+    }
+</script>
 
 </body>
 </html>

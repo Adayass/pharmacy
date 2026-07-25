@@ -1,5 +1,6 @@
 <?php
 require_once 'includes/auth.php';
+require_role(['admin']);
 require_once 'connect.php';
 // $db is the PDO connection from connect.php (equivalent of $conn in the original)
 

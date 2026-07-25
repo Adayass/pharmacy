@@ -35,6 +35,8 @@ $supplierPages = ['supplier', 'purchases'];
 $salesActive    = in_array($current, $salesPages);
 $supplierActive = in_array($current, $supplierPages);
 
+$isAdmin = ($_SESSION['role'] ?? '') === 'admin';
+
 function pims_active($page, $current) {
     return $page === $current ? 'active' : '';
 }
@@ -92,6 +94,7 @@ function pims_active($page, $current) {
             Inventory
         </a>
 
+        <?php if ($isAdmin): ?>
         <!-- Supplier (collapsible) -->
         <div class="pims-group">
             <div class="pims-item pims-toggle <?= $supplierActive ? 'active' : '' ?>" onclick="pimsToggle('pims-supplier-menu', this)">
@@ -120,6 +123,7 @@ function pims_active($page, $current) {
             </span>
             Users
         </a>
+        <?php endif; ?>
 
     </nav>
 

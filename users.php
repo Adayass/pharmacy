@@ -1,5 +1,6 @@
 <?php
 require_once 'includes/auth.php';
+require_role(['admin']); // Users management is admin-only
 require_once 'connect.php';
 
 $deleteError = null;

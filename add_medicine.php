@@ -4,20 +4,17 @@ require_once 'connect.php';
 
 $addError = null;
 
-/* ---------------------------------------------------------
-   Handle form submission
-   --------------------------------------------------------- */
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_medicine'])) {
-    $medicineName    = trim($_POST['medicineName'] ?? '');
-    $barcode         = trim($_POST['barcode'] ?? '');
-    $categoryId      = $_POST['categoryId'] ?? '';
-    $supplierId      = $_POST['supplierId'] ?? '';
-    $quantity        = $_POST['quantity'] ?? '';
-    $minStock        = $_POST['minStock'] ?? '';
-    $price           = $_POST['price'] ?? '';
-    $sellingPrice    = $_POST['sellingPrice'] ?? '';
+    $medicineName= trim($_POST['medicineName'] ?? '');
+    $barcode= trim($_POST['barcode'] ?? '');
+    $categoryId = $_POST['categoryId'] ?? '';
+    $supplierId = $_POST['supplierId'] ?? '';
+    $quantity = $_POST['quantity'] ?? '';
+    $minStock = $_POST['minStock'] ?? '';
+    $price = $_POST['price'] ?? '';
+    $sellingPrice = $_POST['sellingPrice'] ?? '';
     $manufactureDate = $_POST['manufactureDate'] ?? '';
-    $expiryDate      = $_POST['expiryDate'] ?? '';
+    $expiryDate = $_POST['expiryDate'] ?? '';
 
     if ($medicineName === '' || $categoryId === '' || $supplierId === '' || $quantity === '' || $price === '' || $sellingPrice === '' || $expiryDate === '') {
         $addError = "Please fill in all required fields.";
@@ -25,12 +22,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_medicine'])) {
         $addError = "Expiry date must be after the manufacture date.";
     } else {
         try {
-            $stmt = $db->prepare("
-                INSERT INTO medicines
-                    (medicineName, barcode, categoryId, supplierId, quantity, minStock, price, sellingPrice, manufactureDate, expiryDate)
-                VALUES
-                    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ");
+            $stmt = $db->prepare("INSERT INTO medicines (medicineName, barcode, categoryId, supplierId, quantity, minStock, price, sellingPrice, manufactureDate, expiryDate)
+            VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             $stmt->execute([
                 $medicineName,
                 $barcode !== '' ? $barcode : null,
@@ -48,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_medicine'])) {
             exit();
         } catch (PDOException $e) {
             if ($e->getCode() === '23000') {
-                $addError = "That barcode is already assigned to another medicine.";
+                $addError = "the barcode scaned is existe, try again";
             } else {
                 $addError = "Could not save medicine. Please check the values and try again.";
             }
@@ -185,7 +178,7 @@ $pageTitle = 'Add Medicine';
     <div class="scanner-box">
         <div class="scanner-header">
             <h3>Scan Barcode</h3>
-            <button type="button" onclick="closeCameraScanner()">&times;</button>
+            <button type="button" onclick="closeCameraScanner()">x</button>
         </div>
         <div id="cameraReader"></div>
         <p class="scanner-hint" id="scannerHint">Point the camera at the barcode on the medicine box.</p>

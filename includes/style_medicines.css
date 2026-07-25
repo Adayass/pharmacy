@@ -1,365 +1,3 @@
-/* .med-search-bar {
-    display: flex;
-    align-items: center;
-    background: #fff;
-    border-radius: 10px;
-    padding: 10px 16px;
-    gap: 10px;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-    margin-bottom: 16px;
-}
-
-.med-search-icon {
-    color: #9ca3af;
-    gap: 1px
-    
-    
-}
-
-.med-search-bar input[type="text"] {
-    flex: 1;
-    border: none;
-    outline: none;
-    font-size: 14px;
-    padding: 6px 0;
-}
-
-.med-search-btn {
-    background: #eef2ee;
-    border: none;
-    border-radius: 20px;
-    padding: 8px 18px;
-    font-size: 13px;
-    font-weight: 600;
-    color: #1f2937;
-    cursor: pointer;
-}
-
-.med-search-btn:hover {
-    background: #e2e8e2;
-}
-
-.med-filters-bar {
-    display: flex;
-    align-items: flex-end;
-    gap: 24px;
-    background: #f6f8f6;
-    border-radius: 10px;
-    padding: 16px 20px;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-}
-
-.med-filter-group {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.med-filter-group label {
-    font-size: 13px;
-    font-weight: 600;
-    color: #374151;
-}
-
-.med-filter-group select {
-    padding: 8px 12px;
-    border-radius: 8px;
-    border: 1px solid #e5e7eb;
-    background: #fff;
-    font-size: 13px;
-    min-width: 160px;
-}
-
-.med-add-btn {
-    margin-left: auto;
-    background: #2f6f4f;
-    color: #fff;
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 14px;
-    padding: 10px 20px;
-    border-radius: 8px;
-    white-space: nowrap;
-}
-
-.med-add-btn:hover {
-    background: #245a3f;
-}
-
-.badge-ok {
-    color: #2f6f4f;
-}
-
-.badge-warn {
-    color: #b8860b;
-}
-
-.med-actions {
-    display: flex;
-    gap: 12px;
-    font-size: 15px;
-}
-
-.med-actions a {
-    text-decoration: none;
-    color: #4b5563;
-    cursor: pointer;
-}
-
-.med-actions a.med-delete {
-    color: #c0392b;
-}
-
-.med-actions a:hover {
-    opacity: 0.7;
-}
-
-@media (max-width: 700px) {
-    .med-filters-bar {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .med-add-btn {
-        margin-left: 0;
-    }
-} */
-
-
-
-
-
-
-
-
-
-
-
-/* .med-search-bar {
-    display: flex;
-    align-items: center;
-    background: #fff;
-    border-radius: 10px;
-    padding: 10px 16px;
-    gap: 10px;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-    margin-bottom: 16px;
-}
-
-.med-search-icon {
-    color: #9ca3af;
-}
-
-.med-search-bar input[type="text"] {
-    flex: 1;
-    border: none;
-    outline: none;
-    font-size: 14px;
-    padding: 6px 0;
-}
-
-.med-search-btn {
-    background: #eef2ee;
-    border: none;
-    border-radius: 20px;
-    padding: 8px 18px;
-    font-size: 13px;
-    font-weight: 600;
-    color: #1f2937;
-    cursor: pointer;
-}
-
-.med-search-btn:hover {
-    background: #e2e8e2;
-}
-
-.med-filters-bar {
-    display: flex;
-    align-items: flex-end;
-    gap: 24px;
-    background: #f6f8f6;
-    border-radius: 10px;
-    padding: 16px 20px;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-}
-
-.med-filter-group {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.med-filter-group label {
-    font-size: 13px;
-    font-weight: 600;
-    color: #374151;
-}
-
-.med-filter-group select {
-    padding: 8px 12px;
-    border-radius: 8px;
-    border: 1px solid #e5e7eb;
-    background: #fff;
-    font-size: 13px;
-    min-width: 160px;
-}
-
-.med-add-btn {
-    margin-left: auto;
-    background: #2f6f4f;
-    color: #fff;
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 14px;
-    padding: 10px 20px;
-    border-radius: 8px;
-    white-space: nowrap;
-}
-
-.med-add-btn:hover {
-    background: #245a3f;
-}
-
-.badge-ok {
-    color: #2f6f4f;
-}
-
-.badge-warn {
-    color: #b8860b;
-}
-
-.med-actions {
-    display: flex;
-    gap: 12px;
-    font-size: 15px;
-}
-
-.med-actions a {
-    text-decoration: none;
-    color: #4b5563;
-    cursor: pointer;
-}
-
-.med-actions a.med-delete {
-    color: #c0392b;
-}
-
-.med-actions a:hover {
-    opacity: 0.7;
-}
-
-@media (max-width: 700px) {
-    .med-filters-bar {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    .med-add-btn {
-        margin-left: 0;
-    }
-}
-
-
-.pos-alert {
-    padding: 12px 16px;
-    border-radius: 8px;
-    margin-bottom: 16px;
-    font-size: 14px;
-    font-weight: 600;
-}
-
-.pos-alert-error {
-    background: #fde3e3;
-    color: #c0392b;
-}
-
-.med-form {
-    padding: 20px 4px 4px;
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-}
-
-.med-form .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.med-form label {
-    font-size: 13px;
-    font-weight: 600;
-    color: #374151;
-}
-
-.med-form input,
-.med-form select {
-    padding: 11px 14px;
-    border-radius: 8px;
-    border: 1px solid #e5e7eb;
-    font-size: 14px;
-    background: #f6f8fb;
-}
-
-.med-form input:focus,
-.med-form select:focus {
-    outline: none;
-    border-color: #2f6f4f;
-    background: #fff;
-}
-
-.form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-}
-
-.med-form-footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-top: 8px;
-}
-
-.modal-cancel-btn {
-    background: #fff;
-    border: 1px solid #d8dade;
-    color: #14181f;
-    font-weight: 700;
-    padding: 10px 20px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 14px;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-}
-
-.modal-save-btn {
-    background: #2f6f4f;
-    border: none;
-    color: #fff;
-    font-weight: 700;
-    padding: 10px 20px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 14px;
-}
-
-.modal-save-btn:hover {
-    background: #245a3f;
-}
-
-@media (max-width: 700px) {
-    .med-form .form-row {
-        grid-template-columns: 1fr;
-    }
-} */
-
-
-
-
 .med-search-bar {
     display: flex;
     align-items: center;
@@ -447,12 +85,10 @@
 }
 
 .badge-ok {
-    background: #e6f2ea;
     color: #2f6f4f;
 }
 
 .badge-warn {
-    background: #fdf0d5;
     color: #b8860b;
 }
 
@@ -486,7 +122,7 @@
     }
 }
 
-/* ---------- Add Medicine form ---------- */
+/*Add Medicine form*/
 .pos-alert {
     padding: 12px 16px;
     border-radius: 8px;
@@ -498,6 +134,101 @@
 .pos-alert-error {
     background: #fde3e3;
     color: #c0392b;
+}
+
+.pos-alert-success {
+    background: #e6f2ea;
+    color: #2f6f4f;
+}
+
+/*Edit Medicine Modal shell*/
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(30, 48, 61, 0.55);
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+}
+
+.modal-box {
+    background: #fff;
+    border-radius: 14px;
+    width: 100%;
+    max-width: 560px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid #eef0f2;
+    position: sticky;
+    top: 0;
+    background: #fff;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 19px;
+    font-weight: 700;
+    color: #14181f;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 22px;
+    color: #6b7280;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.modal-form {
+    padding: 20px 24px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.modal-form .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.modal-form label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.modal-form input,
+.modal-form select,
+.modal-form textarea {
+    padding: 11px 14px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    font-size: 14px;
+    background: #f6f8fb;
+    font-family: inherit;
+}
+
+.modal-form textarea {
+    resize: vertical;
+}
+
+.modal-form input:focus,
+.modal-form select:focus,
+.modal-form textarea:focus {
+    outline: none;
+    border-color: #2f6f4f;
+    background: #fff;
 }
 
 .med-form {
@@ -583,7 +314,7 @@
     }
 }
 
-/* ---------- Barcode scan (Add Medicine) ---------- */
+/*Barcode scan (Add Medicine)*/
 .barcode-input-row {
     display: flex;
     gap: 8px;
@@ -650,4 +381,18 @@
     color: #718096;
     font-size: 13px;
     margin-top: 10px;
+}
+
+/*reset button*/
+
+.reset-filters{
+    background: rgba(147, 145, 145, 0.393);
+    text-decoration: none;
+    color: rgb(0, 0, 0);
+    border-radius: 10px 10px 10px 10px;
+    border: 1px solid #d8dade;
+    font-weight: 500;
+    padding: 10px 20px;
+    border-radius: 8px;
+    
 }
