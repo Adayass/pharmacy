@@ -1,6 +1,4 @@
-/* =========================================================
-   PIMS Header Styles
-   ========================================================= */
+/*PIMS Header Styles*/
 
 .pims-main {
     flex: 1;
@@ -75,7 +73,7 @@
     flex-shrink: 0;
 }
 
-/* ---------- Responsive ---------- */
+/*responsive*/
 @media (max-width: 600px) {
     .pims-header {
         flex-direction: column;

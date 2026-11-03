@@ -24,6 +24,7 @@ $initials   = strtoupper(substr($userName, 0, 1) . (strpos($userName, ' ') ? sub
 ?>
 <link rel="stylesheet" href="includes/header.css">
 
+
 <header class="pims-header">
     <h1 class="pims-page-title"><?= htmlspecialchars($pageTitle) ?></h1>
 

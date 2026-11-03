@@ -9,7 +9,7 @@ create table users(
     userName varchar(50) not null unique,
     email varchar(100) not null unique,
     phone varchar(20),
-    password varchar(100) not null,
+    password varchar(255) not null,
     role enum ('admin', 'pharmacist', 'staff'),
     status enum ('active', 'inactive') default 'active',
     createdAt timestamp default current_timestamp

@@ -24,9 +24,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_user'])) {
         $addError = "Please select a valid role.";
     } else {
         try {
-            // Stored as plaintext to match login.php's plain comparison.
+            // Hash password securely with PASSWORD_DEFAULT using PHP's password_hash()
+            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
             $stmt = $db->prepare("INSERT INTO users (fullName, userName, email, phone, password, role, status) VALUES (?, ?, ?, ?, ?, ?, ?)");
-            $stmt->execute([$fullName, $userName, $email, $phone, $password, $role, $status]);
+            $stmt->execute([$fullName, $userName, $email, $phone, $hashedPassword, $role, $status]);
             $addSuccess = true;
         } catch (PDOException $e) {
             if ($e->getCode() === '23000') {

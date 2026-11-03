@@ -8,42 +8,66 @@ if (isset($_SESSION['userName'])) {
 }
 
 $current_page = 'login';
-
 $servername = "localhost";
 $dbUser = "root";
 $dbPass = "";
 
 try {
-    $db = new PDO("mysql:host=$servername;dbname=pharmacy_inventory", $dbUser, $dbPass);
+    $db = new PDO("mysql:host=$servername;dbname=4776357_pharmacy", $dbUser, $dbPass);
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (PDOException $e) {
     die("Error: " . $e->getMessage());
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $username = $_POST['username'] ?? '';
+    $username = trim($_POST['username'] ?? '');
     $password = $_POST['password'] ?? '';
 
     if ($username !== "" && $password !== "") {
-
-        $stmt = $db->prepare("SELECT * FROM users WHERE userName = :username AND password = :password");
-        $stmt->execute([
-            'username' => $username,
-            'password' => $password
-        ]);
+        // Select user by username using a prepared statement to prevent SQL injection
+        $stmt = $db->prepare("SELECT * FROM users WHERE userName = :username LIMIT 1");
+        $stmt->execute(['username' => $username]);
         $rep = $stmt->fetch();
 
-        if ($rep !== false) {
-            $_SESSION['userName'] = $rep['userName'];
-            $_SESSION['fullName'] = $rep['fullName'];
-            $_SESSION['role']     = $rep['role'];
-            $_SESSION['userId']   = $rep['userId'];
+        $authenticated = false;
 
-            header("Location: dashboard.php");
-            exit();
+        if ($rep !== false) {
+            // 1. Verify hashed password with password_verify()
+            if (password_verify($password, $rep['password'])) {
+                $authenticated = true;
+                // Re-hash if algorithm or cost parameters have changed
+                if (password_needs_rehash($rep['password'], PASSWORD_DEFAULT)) {
+                    $newHash = password_hash($password, PASSWORD_DEFAULT);
+                    $upd = $db->prepare("UPDATE users SET password = :password WHERE userId = :id");
+                    $upd->execute(['password' => $newHash, 'id' => $rep['userId']]);
+                }
+            }
+            // 2. Migration for existing accounts: verify old plain-text password once and immediately re-hash
+            elseif ($rep['password'] === $password || hash_equals($rep['password'], $password)) {
+                $authenticated = true;
+                $newHash = password_hash($password, PASSWORD_DEFAULT);
+                $upd = $db->prepare("UPDATE users SET password = :password WHERE userId = :id");
+                $upd->execute(['password' => $newHash, 'id' => $rep['userId']]);
+            }
+        }
+
+        if ($authenticated) {
+            if (isset($rep['status']) && strtolower($rep['status']) === 'inactive') {
+                $error_msg = "Your account is inactive. Please contact an administrator.";
+            } else {
+                $_SESSION['userName'] = $rep['userName'];
+                $_SESSION['fullName'] = $rep['fullName'];
+                $_SESSION['role']     = $rep['role'];
+                $_SESSION['userId']   = $rep['userId'];
+
+                header("Location: dashboard.php");
+                exit();
+            }
         } else {
             $error_msg = "Username or password incorrect !";
         }
+    } else {
+        $error_msg = "Please enter both username and password.";
     }
 }
 ?>

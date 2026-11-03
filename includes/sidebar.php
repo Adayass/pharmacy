@@ -1,31 +1,4 @@
 <?php
-/**
- * PIMS - Reusable Sidebar Include
- * ---------------------------------------------------------------
- * HOW TO USE:
- * 1. Save this file, sidebar.css, and logo.svg into your project
- *    (e.g. inside an /includes and /assets folder).
- * 2. On every page, just add:  <?php include 'includes/sidebar.php'; ?>
- * 3. Name your page files exactly like this (or edit the $current
- *    checks below to match your own file names):
- *
- *      dashboard.php
- *      medicines.php
- *      new_sale.php        (Sales -> New Sale (POS))
- *      sales_history.php   (Sales -> Sales History)
- *      inventory.php
- *      supplier.php         (Supplier -> Supplier)
- *      purchases.php        (Supplier -> Purchases)
- *      reports.php
- *      users.php
- *      logout.php
- *
- * The sidebar automatically detects the current page from the URL
- * (basename of the script) and highlights the right menu item, and
- * auto-expands the Sales / Supplier submenu when a child page is open.
- * No extra variables need to be set on each page.
- * ---------------------------------------------------------------
- */
 
 $current = basename($_SERVER['SCRIPT_NAME'], '.php');
 

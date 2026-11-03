@@ -56,7 +56,7 @@ $pageTitle = 'Sales History';
                     </tbody>
                 </table>
             </div>
-
+<?php require_once 'includes/footer.php'; ?>
         </div>
     </main>
 </div>

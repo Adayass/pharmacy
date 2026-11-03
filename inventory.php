@@ -12,9 +12,10 @@ $where  = [];
 $params = [];
 
 if ($search !== '') {
-    $where[] = "(m.medicineName LIKE :search OR m.medicineId = :searchId)";
-    $params['search']   = "%$search%";
-    $params['searchId'] = is_numeric($search) ? (int)$search : 0;
+    $where[] = "(m.medicineName LIKE :search OR m.medicineId = :searchId OR m.barcode = :barcodeExact OR m.barcode LIKE :search)";
+    $params['search']       = "%$search%";
+    $params['barcodeExact'] = $search;
+    $params['searchId']     = is_numeric($search) ? (int)$search : 0;
 }
 
 if ($categoryId !== '') {
@@ -40,7 +41,8 @@ if ($expiryRange === '30') {
 
 $whereSql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
 
-$sql = "SELECT m.medicineId, m.medicineName, c.categoryName, m.quantity, m.minStock, m.expiryDate FROM medicines m LEFT JOIN categories c ON c.categoryId = m.categoryId
+$sql = "SELECT m.medicineId, m.medicineName, m.barcode, c.categoryName, m.quantity, m.minStock, m.expiryDate
+    FROM medicines m LEFT JOIN categories c ON c.categoryId = m.categoryId
     $whereSql
     ORDER BY m.medicineName ASC
 ";
@@ -99,7 +101,7 @@ $pageTitle = 'Inventory';
                 <!-- Search bar -->
                 <form method="GET" class="med-search-bar">
                     <span class="med-search-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
-                    <input type="text" name="q" value="<?= htmlspecialchars($search) ?>" placeholder="Search Medicines by Name, ID">
+                    <input type="text" name="q" value="<?= htmlspecialchars($search) ?>" placeholder="Search Medicines by Name, Barcode, ID">
                     <button type="submit" class="med-search-btn">Search</button>
                 </form>
 
@@ -148,6 +150,7 @@ $pageTitle = 'Inventory';
                         <thead>
                             <tr>
                                 <th>Medicine</th>
+                                <th>Barcode</th>
                                 <th>Category</th>
                                 <th>Current Stock</th>
                                 <th>Minimum Stock</th>
@@ -157,11 +160,18 @@ $pageTitle = 'Inventory';
                         <tbody>
                             <?php if (empty($medicines)): ?>
                                 <tr>
-                                    <td colspan="5" class="empty-row">No medicines match your filters.</td>
+                                    <td colspan="6" class="empty-row">No medicines match your filters.</td>
                                 </tr>
                                 <?php else: foreach ($medicines as $m): $status = invStatus($m); ?>
                                     <tr>
                                         <td><?= htmlspecialchars($m['medicineName']) ?></td>
+                                        <td>
+                                            <?php if (!empty($m['barcode'])): ?>
+                                                <code style="background:#eef2ee; padding:2px 6px; border-radius:4px; font-size:12px;"><?= htmlspecialchars($m['barcode']) ?></code>
+                                            <?php else: ?>
+                                                <span style="color:#9ca3af; font-size:12px;">—</span>
+                                            <?php endif; ?>
+                                        </td>
                                         <td><?= htmlspecialchars($m['categoryName'] ?? 'N/A') ?></td>
                                         <td><?= (int)$m['quantity'] ?></td>
                                         <td><?= (int)$m['minStock'] ?></td>

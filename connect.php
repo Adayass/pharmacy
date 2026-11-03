@@ -5,7 +5,7 @@ $password="";
 
 
 try{
-    $db = new PDO("mysql:host=$servername;dbname=pharmacy_inventory" , $username, $password);
+    $db = new PDO("mysql:host=$servername;dbname=4776357_pharmacy" , $username, $password);
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     //echo "connection successful !";
 }

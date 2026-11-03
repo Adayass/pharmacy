@@ -23,7 +23,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_purchase'])) {
             $price = $prices[$i] ?? '';
             if ($medId !== '' && $qty !== '' && $price !== '' && (int)$qty > 0) {
                 $lineItems[] = [
-
                     'medicineId' => (int)$medId,
                     'quantity'   => (int)$qty,
                     'price'      => (float)$price,
@@ -68,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_purchase'])) {
 }
 
 $suppliers = $db->query("SELECT supplierId, supplierName FROM suppliers ORDER BY supplierName")->fetchAll();
-$medicines = $db->query("SELECT medicineId, medicineName FROM medicines ORDER BY medicineName")->fetchAll();
+$medicines = $db->query("SELECT medicineId, medicineName, barcode, price FROM medicines ORDER BY medicineName")->fetchAll();
 
 $pageTitle = 'Purchases';
 ?>
@@ -81,6 +80,61 @@ $pageTitle = 'Purchases';
     <link rel="stylesheet" href="includes/style.css">
     <link rel="stylesheet" href="includes/style_dashboard.css">
     <link rel="stylesheet" href="includes/style_purchases.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- html5-qrcode: camera barcode scanning -->
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <style>
+        .purchase-scan-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+            align-items: center;
+        }
+        .purchase-scan-input {
+            flex: 1;
+            padding: 9px 12px;
+            border: 1px solid #cbd5e0;
+            border-radius: 6px;
+            font-size: 13px;
+            outline: none;
+        }
+        .purchase-scan-input:focus {
+            border-color: #2f6f4f;
+        }
+        .scan-feedback-badge {
+            display: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            margin-bottom: 12px;
+        }
+        .scan-feedback-badge.success {
+            background: #edf7ed;
+            border: 1px solid #b7eb8f;
+            color: #1e4620;
+        }
+        .scan-feedback-badge.error {
+            background: #fdf2f2;
+            border: 1px solid #f8b4b4;
+            color: #9b1c1c;
+        }
+        .scan-cam-btn {
+            background: #2f6f4f;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 9px 14px;
+            font-size: 13px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+        .scan-cam-btn:hover {
+            background: #245a3f;
+        }
+    </style>
 </head>
 <body>
 
@@ -132,6 +186,16 @@ $pageTitle = 'Purchases';
                     </div>
 
                     <div class="line-items-box">
+                        <!-- Barcode Scanner Bar for incoming deliveries -->
+                        <div class="purchase-scan-bar">
+                            <i class="fa-solid fa-barcode" style="color: #2f6f4f; font-size: 20px;"></i>
+                            <input type="text" id="purchaseBarcodeInput" class="purchase-scan-input" placeholder="Scan medicine barcode with scanner to add or select item..." autocomplete="off">
+                            <button type="button" class="scan-cam-btn" onclick="openPurchaseCameraScanner()" title="Scan with camera">
+                                <i class="fa-solid fa-camera"></i> Camera
+                            </button>
+                        </div>
+                        <div id="purchaseScanFeedback" class="scan-feedback-badge"></div>
+
                         <div class="line-items-header">
                             <span>Medicine</span>
                             <span>Quantity</span>
@@ -141,10 +205,12 @@ $pageTitle = 'Purchases';
 
                         <div id="lineItemsContainer">
                             <div class="line-item-row">
-                                <select name="medicineId[]" class="line-medicine" onchange="recalcTotal()">
+                                <select name="medicineId[]" class="line-medicine" onchange="onMedicineSelected(this)">
                                     <option value="">Select medicine</option>
                                     <?php foreach ($medicines as $m): ?>
-                                        <option value="<?= $m['medicineId'] ?>"><?= htmlspecialchars($m['medicineName']) ?></option>
+                                        <option value="<?= $m['medicineId'] ?>" data-barcode="<?= htmlspecialchars($m['barcode'] ?? '') ?>" data-price="<?= $m['price'] ?? '' ?>">
+                                            <?= htmlspecialchars($m['medicineName']) ?><?= !empty($m['barcode']) ? ' [' . htmlspecialchars($m['barcode']) . ']' : '' ?>
+                                        </option>
                                     <?php endforeach; ?>
                                 </select>
                                 <input type="number" name="quantity[]" class="line-qty" placeholder="Qty" min="1" oninput="recalcTotal()">
@@ -167,7 +233,35 @@ $pageTitle = 'Purchases';
     </main>
 </div>
 
+<!-- Camera Scanner Modal -->
+<div class="scanner-overlay" id="purchaseScannerOverlay" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; z-index: 200;">
+    <div class="scanner-box" style="background: #fff; border-radius: 12px; padding: 20px; width: 100%; max-width: 400px;">
+        <div class="scanner-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <h3 style="margin: 0;">Scan Barcode</h3>
+            <button type="button" onclick="closePurchaseCameraScanner()" style="background: none; border: none; font-size: 20px; cursor: pointer;">&times;</button>
+        </div>
+        <div id="purchaseCameraReader"></div>
+        <p class="scanner-hint" id="purchaseScannerHint" style="text-align: center; color: #718096; font-size: 13px; margin-top: 10px;">Point camera at the medicine barcode.</p>
+    </div>
+</div>
+
 <script>
+let purchaseCameraScanner = null;
+const purchaseBarcodeInput = document.getElementById('purchaseBarcodeInput');
+const purchaseScanFeedback = document.getElementById('purchaseScanFeedback');
+
+function onMedicineSelected(selectEl) {
+    const selectedOption = selectEl.options[selectEl.selectedIndex];
+    const defaultPrice = selectedOption.getAttribute('data-price');
+    const row = selectEl.closest('.line-item-row');
+    const priceInput = row.querySelector('.line-price');
+
+    if (defaultPrice && (!priceInput.value || parseFloat(priceInput.value) === 0)) {
+        priceInput.value = defaultPrice;
+    }
+    recalcTotal();
+}
+
 function rowTemplate() {
     const container = document.getElementById('lineItemsContainer');
     const first = container.querySelector('.line-item-row');
@@ -178,7 +272,9 @@ function rowTemplate() {
 
 function addRow() {
     const container = document.getElementById('lineItemsContainer');
-    container.appendChild(rowTemplate());
+    const newRow = rowTemplate();
+    container.appendChild(newRow);
+    return newRow;
 }
 
 function removeRow(btn) {
@@ -198,6 +294,101 @@ function recalcTotal() {
         total += qty * price;
     });
     document.getElementById('totalDisplay').textContent = total.toLocaleString();
+}
+
+/* -------------------------------------------------------------
+   Barcode Scanning Logic for Purchases
+   ------------------------------------------------------------- */
+purchaseBarcodeInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        const code = this.value.trim();
+        if (code) {
+            handlePurchaseBarcodeScan(code);
+        }
+    }
+});
+
+async function handlePurchaseBarcodeScan(barcode) {
+    purchaseBarcodeInput.value = '';
+    purchaseScanFeedback.style.display = 'block';
+    purchaseScanFeedback.className = 'scan-feedback-badge';
+    purchaseScanFeedback.textContent = `Looking up barcode "${barcode}"...`;
+
+    try {
+        const res = await fetch(`lookup_barcode.php?barcode=${encodeURIComponent(barcode)}`);
+        const data = await res.json();
+
+        if (data.found && data.medicine) {
+            const med = data.medicine;
+
+            // Find an empty row or create a new row
+            const rows = document.querySelectorAll('.line-item-row');
+            let targetRow = null;
+
+            for (let row of rows) {
+                const sel = row.querySelector('.line-medicine');
+                if (!sel.value) {
+                    targetRow = row;
+                    break;
+                }
+            }
+
+            if (!targetRow) {
+                targetRow = addRow();
+            }
+
+            const sel = targetRow.querySelector('.line-medicine');
+            sel.value = String(med.medicineId);
+
+            const priceInput = targetRow.querySelector('.line-price');
+            priceInput.value = med.price;
+
+            const qtyInput = targetRow.querySelector('.line-qty');
+            qtyInput.focus();
+
+            recalcTotal();
+
+            purchaseScanFeedback.className = 'scan-feedback-badge success';
+            purchaseScanFeedback.textContent = `✅ Selected "${med.medicineName}" (Barcode: ${med.barcode}) with buying price UGX ${med.formattedPrice}. Enter quantity.`;
+        } else {
+            purchaseScanFeedback.className = 'scan-feedback-badge error';
+            purchaseScanFeedback.textContent = `❌ Barcode not found: No medicine matches barcode "${barcode}".`;
+        }
+    } catch (err) {
+        purchaseScanFeedback.className = 'scan-feedback-badge error';
+        purchaseScanFeedback.textContent = '❌ Server communication error.';
+    }
+}
+
+function openPurchaseCameraScanner() {
+    const overlay = document.getElementById('purchaseScannerOverlay');
+    overlay.style.display = 'flex';
+    document.getElementById('purchaseScannerHint').textContent = 'Point camera at the medicine barcode.';
+    document.getElementById('purchaseScannerHint').style.color = '';
+    purchaseCameraScanner = new Html5Qrcode("purchaseCameraReader");
+
+    purchaseCameraScanner.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: { width: 250, height: 150 } },
+        (decodedText) => {
+            closePurchaseCameraScanner();
+            handlePurchaseBarcodeScan(decodedText);
+        },
+        () => {}
+    ).catch(() => {
+        document.getElementById('purchaseScannerHint').textContent = '❌ Could not access camera';
+        document.getElementById('purchaseScannerHint').style.color = '#c0392b';
+    });
+}
+
+function closePurchaseCameraScanner() {
+    document.getElementById('purchaseScannerOverlay').style.display = 'none';
+    if (purchaseCameraScanner) {
+        purchaseCameraScanner.stop().catch(() => {});
+        purchaseCameraScanner = null;
+    }
+    purchaseBarcodeInput.focus();
 }
 </script>
 
