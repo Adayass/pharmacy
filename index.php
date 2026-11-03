@@ -8,12 +8,13 @@ if (isset($_SESSION['userName'])) {
 }
 
 $current_page = 'login';
-$servername = "localhost";
-$dbUser = "root";
-$dbPass = "";
+$servername = "pharmacyinventory-pims.g.aivencloud.com";
+$dbUser = "avnadmin";
+$dbPass = "AVNS_i_8rycbSeTXKyVFFeS1";
+$port = "24966";
 
 try {
-    $db = new PDO("mysql:host=$servername;dbname=4776357_pharmacy", $dbUser, $dbPass);
+    $db = new PDO("mysql:host=$servername;dbname=defaultdb"; port=$port, $dbUser, $dbPass);
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (PDOException $e) {
     die("Error: " . $e->getMessage());
