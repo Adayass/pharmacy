@@ -2,7 +2,7 @@
 $servername = "pharmacyinventory-pims.g.aivencloud.com";
 $username = "avnadmin";
 $password="AVNS_i_8rycbSeTXKyVFFeS1";
-$port = "24966"
+$port = "24966";
 
 
 try{
