@@ -1,3 +1,9 @@
+body {
+  -webkit-user-select: none; /* Safari et Chrome */
+  -moz-user-select: none;    /* Firefox */
+  -ms-user-select: none;     /* Internet Explorer / Edge */
+  user-select: none;         /* Standard */
+}
 .pos-alert {
     padding: 12px 16px;
     border-radius: 8px;
