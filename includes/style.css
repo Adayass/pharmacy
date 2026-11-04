@@ -5,7 +5,12 @@
     padding: 0;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
-
+body {
+  -webkit-user-select: none; /* Safari et Chrome */
+  -moz-user-select: none;    /* Firefox */
+  -ms-user-select: none;     /* Internet Explorer / Edge */
+  user-select: none;         /* Standard */
+}
 /* body {
     background-color: #1e303d;
     min-height: 100vh;
