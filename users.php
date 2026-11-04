@@ -154,7 +154,7 @@ $pageTitle = 'Users';
 
             <div class="form-group">
                 <label>Name</label>
-                <input type="text" name="fullName" value="<?= htmlspecialchars($_POST['fullName'] ?? '') ?>" required placeholder="e.g John Doe">
+                <input type="text" name="fullName" value="<?= htmlspecialchars($_POST['fullName'] ?? '') ?>" required placeholder="e.g Yassin">
             </div>
 
             <div class="form-row">
