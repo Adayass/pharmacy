@@ -383,7 +383,7 @@ $pageTitle = 'Add Medicine';
             } else {
                 // Barcode is available for new registration
                 statusCard.className = 'barcode-status-card success';
-                statusTitle.textContent = '✅ Barcode Available';
+                statusTitle.textContent = 'Barcode Available';
                 statusMsg.textContent = `Barcode "${barcode}" is not registered in the system. You can proceed with registration.`;
                 medDetails.style.display = 'none';
                 actionArea.style.display = 'none';
@@ -393,7 +393,7 @@ $pageTitle = 'Add Medicine';
             }
         } catch (err) {
             statusCard.className = 'barcode-status-card error';
-            statusTitle.textContent = '❌ Lookup Error';
+            statusTitle.textContent = 'Lookup Error';
             statusMsg.textContent = 'Could not verify barcode with server. Please try again.';
         }
     }
