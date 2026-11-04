@@ -574,7 +574,7 @@ $pageTitle = 'Medicines';
                 const med = data.medicine;
                 medScanStatus.style.display = 'block';
                 medScanStatus.style.color = '#0e9f6e';
-                medScanStatus.textContent = `✅ Medicine found: "${med.medicineName}"`;
+                medScanStatus.textContent = `Medicine found: "${med.medicineName}"`;
 
                 // Display medicine information
                 document.getElementById('resMedName').textContent = med.medicineName;
@@ -608,7 +608,7 @@ $pageTitle = 'Medicines';
             } else {
                 medScanStatus.style.display = 'block';
                 medScanStatus.style.color = '#e02424';
-                medScanStatus.textContent = `❌ No medicine found with barcode "${barcode}".`;
+                medScanStatus.textContent = `No medicine found with barcode "${barcode}".`;
 
                 medScanNotFound.style.display = 'block';
                 document.getElementById('linkRegisterScanned').href = `add_medicine.php?barcode=${encodeURIComponent(barcode)}`;
@@ -616,7 +616,7 @@ $pageTitle = 'Medicines';
         } catch (err) {
             medScanStatus.style.display = 'block';
             medScanStatus.style.color = '#e02424';
-            medScanStatus.textContent = '❌ Server communication error.';
+            medScanStatus.textContent = 'Server communication error.';
         }
     }
 
@@ -637,7 +637,7 @@ $pageTitle = 'Medicines';
         ).catch(() => {
             medScanStatus.style.display = 'block';
             medScanStatus.style.color = '#e02424';
-            medScanStatus.textContent = '❌ Could not access camera';
+            medScanStatus.textContent = 'Could not access camera';
         });
     }
 
